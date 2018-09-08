@@ -17,7 +17,7 @@
   - その他プレイヤーマッピングなどの機能にも導入していく
 
 - ゲームプロジェクトの作成
-- ソースコードはWebに上がってる
+- ソースコードはWebに上がってる：[ここ](https://github.com/oreilly-japan/augmented-reality-game-development-ja/tree/master#%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB%E3%82%B3%E3%83%BC%E3%83%89)
 
 ### モバイル開発を始める
 iOSのセッティングに関することは次のURLを参照にする
@@ -119,9 +119,10 @@ https://maps.googleapis.com/maps/api/staticmap?{パラメータ}
   - hydrid ...衛星地図+roadmap
 
 ### マップ実装
-- タイルを敷き詰めることで画質向上
+- 領域全てを1まいのタイルでやると画質が悪い
+  → タイルを敷き詰めることで画質向上を図る
 - cmd+Dで複製
-- このタイル敷き詰めに対数計算は"GoogleMapTile"スクリプトがやってくれる
+- このタイル敷き詰めに対する計算は"GoogleMapTile"スクリプトがやってくれる
 
 
 ### コルーチン
@@ -204,11 +205,11 @@ IEnumerator coRoutine(){
 - サービス...本書では,他のゲームオブジェクトに消費され,自己管理クラスとして実行されるコードのことを指す
 
 ここでは2つのサービスを設定する
-- GPS Location Service ...プレイヤーの位置情報を得るための
-- CUDLR ...デバッグのため
+- GPS Location Service ...プレイヤーの位置情報を得るためのサービス.
+- CUDLR ...デバックのためのサービス.コンソールデバックツール.
 
 #### CUDLRの設定
-- Asset Storeから取ってくる(なお,Unity2018には対応してるか怪しい模様)
+- Asset Storeから取ってくる(なお,Unity2018には対応してるか怪しい模様.でも,ちゃんと動いた.)
 - デバイスの監視に加えて,簡単なコンソールコマンドをリモートで実行するためにも利用できる
 - CUDLRはゲームの一部をWEBサーバーに変えてしまう
   - CUDLRはネットワーク上のどのコンピューターからでもアクセスできるため,ゲームを制御するために物理的な接続もUnityの実行も必要ない
@@ -274,3 +275,76 @@ The backing file has been modified outside of Xcode.
 1. [アプリを実機で動かそうとしたら CodeSign error: code signing is required for product type 'Application' in SDK 'iOS 7.1'エラー](https://qiita.com/ohkawa/items/044dd9b3bed2e5ee5fce)
 2. [【Unity】iOS・Android向けビルドのチュートリアル](https://vracademy.jp/blog/?p=936)
 3. [iPhoneアプリ開発実践！その5 -「Development cannot be …」エラー](https://ameblo.jp/t-higashi5494/entry-12296196378.html)
+
+
+## 3章 アバターの作成
+### 概要
+やることは以下のPoint
+- 標準のUnityアセットのインポート
+- 3Dアニメーションキャラクターの扱いについて
+- 3人章視点コントローラーとカメラのポジショニング
+- 自由視点カメラ
+- クロスぷらっとフォーム入力
+- キャラクターコントローラーの作成
+- コンポーネントスクリプトの更新
+- iCloneキャラクターの使用
+
+### 標準のUnityアセットのインポート
+アセットを利用して手軽にゲーム開発しましょー.
+標準アセットを利用して、都合に置いてはアセットを書き直したり、置き換えたりする.
+
+#### 標準アセットのインポート
+1. メニューバーの[Asset] > [Import Package] から標準アセットの項目がみられる.このうち,CamerasとCharactersとCrossPlatformInputのものを全てインポート(しかし、そのままだと、不必要なものも含んでおり、プロジェクトの肥大化を招くためその対処が必要となる.この章の後半で扱う)
+
+#### 3Dアニメーションキャラクターのの追加
+2. Assets/Standard Assets/Characters/Third Person Character/PrefabsからThirdPersonControllerをHierarchyウィンドウに.
+  - 開発が問題ないことを確認するために、標準キャラクターのEthanでプロトタイピング.
+3.  ThirdPersonControllerの名前をPlayerにする
+  - 標準Assetsの多くは、Playerオブジェクトに対し、Playerという名前でアクセスするようになってる
+  - この状況でゲームスタートしても動かない
+
+#### カメラの切り替え
+Mapシーンを自由に動き回れる三人称視点のカメラの追加.
+
+4. Assets/Standard Assets/Cameras/PrefabsからFreeLookCameraRigを選択、Hierarchyウィンドウに移動.Playerのこオブジェクトにする.
+  - Free Look CmaコンポーネントのAuto Target PlayerのチェックボックスにチェックするとPlayerという名前がついたオブジェクトを自動追跡
+5. Main Cameraを消す
+6. Assets/Standard Assets/CrossPlatformInput/PrefabsからDualTouchControlsをHierarchyウィンドウに.
+  - これにより、「デュアルタッチコントロールインターフェースがオーバーレイ」されるらしい(日本語でおk)
+  - ここでエラー
+    ```
+    Assertion failed on expression: 'modifications.empty()'
+    UnityEditorInternal.InternalEditorUtility:HierarchyWindowDrag(HierarchyProperty, Boolean, HierarchyDropMode)
+    UnityEngine.GUIUtility:ProcessEvent(Int32, IntPtr)
+    ```
+  - ということで、まず、CrossPlatformInputについて調べた
+    - CrossPlatformInput:複数のプラットフォームに対応した入力インタフェース
+    - なんのエラーかわからない...
+    - 参考:
+      - [【Unity】CrossPlatformInputを使う その1 Import編](https://www.urablog.xyz/entry/2016/07/24/070000)
+      - [【Unity】CrossPlatformInputを使う その3 DualTouchControls編](https://www.urablog.xyz/entry/2016/07/26/070000s)
+    - 次のスッテプの[Moblie Input] > [Enable]押せない。。。と思ってたら、最初からEnableになってたらしい...なんだよ...
+7. メニューバーから[Moblie Input] > [Enable]
+8. 再生すると、パネルをCtrl+クリックでカメラが動かせるようになる...らしいがJumpしかできないw(とりあえず、先に進む)(実機ではできた)
+
+インポートしたAseetの中身を書き換える
+
+Input.compassはUnityEngineクラスのInputインターフェース?のインターフェース？Compassとして標準装備
+Input.compass.enabledはstatic変数
+
+```
+// axis の周りを angle 度回転する回転を作成します
+public static Quaternion AngleAxis (float angle, Vector3 axis);
+```
+
+Vector3.up ...upはVector3のstatic変数.Vector3(0, 1, 0)と同じ.
+- [Vector3 - Unity スクリプトリファレンス](https://docs.unity3d.com/ja/current/ScriptReference/Vector3.html)
+
+float型の後にはfをつける
+Quaternion.Slerp ...球場補間.(なおビルド時回転せず...)
+
+#### CharacterGPSCompassController
+名前空間を使う(Unityは標準ではこれを必要としない)
+
+
+## 4章 獲物の生成
