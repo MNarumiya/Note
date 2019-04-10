@@ -69,6 +69,32 @@
 ## 微分表現
 - ドット表現...`\dot{x}`や`\ddot`
 
+### 偏微分
+```
+\[
+  f_{x},
+  f_{xy}
+\]
+```
+
+もしくは
+
+```
+\[
+  \frac{\partial f}{\partial y},
+  \frac{\partial^2 f}{\partial^2 y},
+  \frac{\partial}{\partial x} \left(\frac{\partial z}{\partial y}\right)
+\]
+```
+
+### ラプラシアン
+```
+\[
+  \Delta = \nabla^2 =
+  \frac{\partial^2 f}{\partial x^2} + \frac{\partial^2 f}{\partial y^2}
+\]
+```
+
 ## 連立方程式
 ```
 \begin{numcases}
